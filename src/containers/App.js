@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import classes from './App.css';
 import Persons from '../components/Persons/Persons';
 import Cockpit from '../components/Cockpit/Cockpit';
-
+import withClass from '../hoc/withClass';
+import Aux from '../hoc/Auxiliary';
 
 class App extends Component {
 
@@ -19,7 +20,9 @@ class App extends Component {
       { id: 'ouikhjgh', name : 'Jordan', age: 24},
     ],
     otherState: 'some other value',
-    showPersons: false
+    showPersons: false,
+    showCockpit: true,
+    changeCounter: 0
   }
 
 
@@ -39,6 +42,15 @@ class App extends Component {
     console.log('[App.js] component did mount');
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('[App.js] shouldComponentUpdate');
+    return true;
+  }
+
+  componentDidUpdate() {
+    console.log('[App.js] componentDidUpdate');
+  }
+
   nameChangedHandler = (event, id) => {
     const personIndex = this.state.persons.findIndex(p => {
       return p.id === id;
@@ -53,7 +65,12 @@ class App extends Component {
     const persons = [...this.state.persons];
     persons[personIndex] = person;
 
-    this.setState( {persons: persons});
+    this.setState( (prevState, props) => {
+      return {
+        persons: persons,
+        changeCounter: this.state.changeCounter+1
+      }
+     });
   }
 
   togglePersonsHandler = () => {
@@ -78,16 +95,23 @@ class App extends Component {
     
 
     return (
-      <div className={classes.App}>
+      <Aux>
+      <button 
+        onClick={() => {
+          this.setState({showCockpit: false})}}>
+          Remove Cockpit
+      </button>
+        {this.state.showCockpit ? ( 
         <Cockpit 
         title={this.props.appTitle}
         showPersons={this.state.showPersons}
-        persons={this.state.persons}
+        personsLength={this.state.persons.length}
         clicked={this.togglePersonsHandler} />
+        ) : null }
         {persons}
-      </div>
+      </Aux> 
     );
   }
 }
 
-export default App;
+export default withClass(App, classes.App);
